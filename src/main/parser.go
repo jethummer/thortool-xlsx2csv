@@ -46,10 +46,10 @@ func Import(inFile string) {
 		ignore := map[int]bool{}
 		//遍历行读取
 		for _, row := range sheet.Rows {
-			if line != 1 && strings.HasPrefix(row.Cells[0].String(),"#") {
+			if strings.HasPrefix(row.Cells[0].String(),"#") {
 				continue
 			}
-			// 遍历每行的列读取
+			//遍历每行的列读取
 			col := 0
 			for _, cell := range row.Cells {
 				col++;
@@ -59,6 +59,7 @@ func Import(inFile string) {
 						ignore[col] = false
 					} else {
 						ignore[col] = true
+						content = content + cell.String() + splitSign
 					}
 				} else {
 					if ignore[col] {
