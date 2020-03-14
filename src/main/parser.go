@@ -41,35 +41,44 @@ func Import(inFile string) {
 		if strings.HasPrefix(sheet.Name, "#") || fileName == "" {
 			continue
 		}
-		fileName = strings.ReplaceAll(fileName," ","")
+		fileName = strings.ReplaceAll(fileName, " ", "")
 		line := 0
 		ignore := map[int]bool{}
 		//遍历行读取
 		for _, row := range sheet.Rows {
-			if strings.HasPrefix(row.Cells[0].String(),"#") {
+			if len(row.Cells) == 0 {
+				continue
+			}
+			if strings.HasPrefix(row.Cells[0].String(), "#") {
 				continue
 			}
 			//遍历每行的列读取
 			col := 0
+			linecontent := ""
 			for _, cell := range row.Cells {
-				col++;
+				col++
 				if line == 0 {
 					tmp := cell.String()
-					if strings.HasPrefix(tmp,"#") {
+					if strings.HasPrefix(tmp, "#") || len(strings.TrimSpace(tmp)) == 0 {
 						ignore[col] = false
 					} else {
 						ignore[col] = true
-						content = content + cell.String() + splitSign
+						linecontent = linecontent + cell.String() + splitSign
 					}
 				} else {
 					if ignore[col] {
-						content = content + cell.String() + splitSign
+						linecontent = linecontent + cell.String() + splitSign
 					}
 				}
 			}
 			line++
-			if len(content) != 0 {
-				content = content + "\n"
+			linecontent = strings.ReplaceAll(linecontent, "\n", "")
+			linecontent = strings.ReplaceAll(linecontent, "\r", "")
+			length := len(strings.ReplaceAll(linecontent, ",", ""))
+			//fmt.Println(">>cnt:", linecontent)
+			//fmt.Println(">>len:", length)
+			if len(linecontent) != 0 && length != 0 {
+				content = content + strings.TrimRight(linecontent, splitSign) + "\n"
 			}
 		}
 		WriteWithIoutil(target+"/"+fileName+".csv", strings.TrimRight(content, splitSign))
@@ -109,8 +118,8 @@ func WriteWithIoutil(name, content string) {
 
 func FindRealName(oldName string) string {
 	findReg := regexp.MustCompile(`(?s)\((.*)\)`)
-	reg := findReg.FindAllStringSubmatch(oldName,-1)
-	if len(reg)> 0 {
+	reg := findReg.FindAllStringSubmatch(oldName, -1)
+	if len(reg) > 0 {
 		return reg[0][1]
 	}
 	return ""
