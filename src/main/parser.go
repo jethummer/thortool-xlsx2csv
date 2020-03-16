@@ -57,23 +57,26 @@ func Import(inFile string) {
 			linecontent := ""
 			for _, cell := range row.Cells {
 				col++
+				tmp := cell.String()
+				tmp = strings.ReplaceAll(tmp, ",", "/")
 				if line == 0 {
-					tmp := cell.String()
 					if strings.HasPrefix(tmp, "#") || len(strings.TrimSpace(tmp)) == 0 {
 						ignore[col] = false
 					} else {
 						ignore[col] = true
-						linecontent = linecontent + cell.String() + splitSign
+						linecontent = linecontent + tmp + splitSign
 					}
 				} else {
 					if ignore[col] {
-						linecontent = linecontent + cell.String() + splitSign
+						linecontent = linecontent + tmp + splitSign
 					}
 				}
 			}
 			line++
 			linecontent = strings.ReplaceAll(linecontent, "\n", "")
 			linecontent = strings.ReplaceAll(linecontent, "\r", "")
+			linecontent = strings.ReplaceAll(linecontent, "\x0a", "")
+			linecontent = strings.ReplaceAll(linecontent, " ", "")
 			length := len(strings.ReplaceAll(linecontent, ",", ""))
 			//fmt.Println(">>cnt:", linecontent)
 			//fmt.Println(">>len:", length)
