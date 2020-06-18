@@ -26,7 +26,19 @@ func ParseXlsx() {
 	}
 }
 
+func ExtractPath(pathName string) string {
+	start := strings.Index(pathName, "(") + 1
+	end := strings.Index(pathName, ")")
+	return string(pathName[start:end])
+}
+
+func ExtractFile(sheetName string) (string, string) {
+	start := strings.Index(sheetName, "@")
+	return string(sheetName[0:start]), string(sheetName[start+1:])
+}
+
 func Import(inFile string) {
+	pathPrefix := ExtractPath(inFile) + "$"
 	// 打开文件
 	xlFile, err := xlsx.OpenFile(inFile)
 	if err != nil {
@@ -42,9 +54,11 @@ func Import(inFile string) {
 			continue
 		}
 		fileName = strings.ReplaceAll(fileName, " ", "")
+
 		line := 0
 		ignore := map[int]bool{}
 		//遍历行读取
+		totalRow := 0
 		for _, row := range sheet.Rows {
 			if len(row.Cells) == 0 {
 				continue
@@ -63,6 +77,7 @@ func Import(inFile string) {
 					if strings.HasPrefix(tmp, "#") || len(strings.TrimSpace(tmp)) == 0 {
 						ignore[col] = false
 					} else {
+						totalRow++
 						ignore[col] = true
 						linecontent = linecontent + tmp + splitSign
 					}
@@ -76,15 +91,20 @@ func Import(inFile string) {
 			linecontent = strings.ReplaceAll(linecontent, "\n", "")
 			linecontent = strings.ReplaceAll(linecontent, "\r", "")
 			linecontent = strings.ReplaceAll(linecontent, "\x0a", "")
-			linecontent = strings.ReplaceAll(linecontent, " ", "")
-			length := len(strings.ReplaceAll(linecontent, ",", ""))
-			//fmt.Println(">>cnt:", linecontent)
-			//fmt.Println(">>len:", length)
+			length := len(strings.ReplaceAll(strings.ReplaceAll(linecontent, " ", ""), ",", ""))
 			if len(linecontent) != 0 && length != 0 {
-				content = content + strings.TrimRight(linecontent, splitSign) + "\n"
+				content = content + strings.TrimRight(linecontent, splitSign)
 			}
+			count := strings.Count(linecontent, splitSign)
+			if count != totalRow {
+				content = content + strings.Repeat(splitSign, totalRow-count)
+			}
+			if len(linecontent) != 0 && length != 0 {
+				content = content + "\n"
+			}
+
 		}
-		WriteWithIoutil(target+"/"+fileName+".csv", strings.TrimRight(content, splitSign))
+		WriteWithIoutil(target+"/"+pathPrefix+fileName+".csv", strings.TrimRight(content, splitSign))
 
 	}
 	fmt.Println("\n\nimport success")

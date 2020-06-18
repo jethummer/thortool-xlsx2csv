@@ -18,3 +18,4 @@
 pkg
 .DS_Store
 /xlsx2csv
+/tmp/
