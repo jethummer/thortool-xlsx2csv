@@ -2,7 +2,7 @@
 
 usage: xlsx2csv -s xlsx -t csv
 
-Windows 平台编译: CGO_ENABLED=0;GOOS=windows;GOARCH=amd64
+Windows Platform: CGO_ENABLED=0;GOOS=windows;GOARCH=amd64
 
 
 
